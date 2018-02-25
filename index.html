@@ -1,157 +1,166 @@
-<template id="nameTemplate">
- <h2></h2>
-</template>
+<!DOCTYPE html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>boop!</title>
+    <link rel="stylesheet" href="/bulma-0.6.2/css/bulma.css" >
+  </head>
 
-<template id="selectTemplate">
- <label>
- </label>
- <select></select>
-</template>
+  <body>
+    <section class="section">
+    </section>
 
-<template id="textTemplate">
- <label>
- </label>
- <input type="text" />
-</template>
+    <template id="nameTemplate">
+     <h2></h2>
+    </template>
 
-<template id="rangeTemplate">
- <label>
- </label>
- <input type="range" />
-</template>
+    <template id="selectTemplate">
+     <label></label>
+     <select></select>
+    </template>
 
-<script>
-  const state = {
-    "DESCRIPTION": "root node",
-    "FULL_PATH": "/",
-    "ACCESS": 0,
-    "CONTENTS": {
-      "foo": {
-        "DESCRIPTION": "demonstrates a read-only OSC node- single float value ranged 0-100",
-        "FULL_PATH": "/foo",
-        "ACCESS": 1,
-        "TYPE": "f",
-        "VALUE": [
-          0.5
-        ],
-        "RANGE": [
-          {
-            "MIN": 0.0,
-            "MAX": 100.0
-          }
-        ]
-      },
-      "bar": {
-        "DESCRIPTION": "demonstrates a read/write OSC node- two ints with different ranges",
-        "FULL_PATH": "/bar",
-        "ACCESS": 3,
-        "TYPE": "ii",
-        "VALUE": [
-          4,
-          51
-        ],
-        "RANGE": [
-          {
-            "MIN": 0,
-            "MAX": 50
-          },
-          {
-            "MIN": 51,
-            "MAX": 100
-          }
-        ]
-      },
-      "baz": {
-        "DESCRIPTION": "simple container node, with one method- qux",
-        "FULL_PATH": "/baz",
+    <template id="textTemplate">
+     <label></label>
+     <input type="text" />
+    </template>
+
+    <template id="rangeTemplate">
+     <label></label>
+     <input type="range" />
+    </template>
+
+    <script>
+      const state = {
+        "DESCRIPTION": "root node",
+        "FULL_PATH": "/",
         "ACCESS": 0,
         "CONTENTS": {
-          "qux":  {
-            "DESCRIPTION": "read/write OSC node- accepts one of several string-type inputs",
-            "FULL_PATH": "/baz/qux",
-            "ACCESS": 3,
-            "TYPE": "s",
+          "foo": {
+            "DESCRIPTION": "demonstrates a read-only OSC node- single float value ranged 0-100",
+            "FULL_PATH": "/foo",
+            "ACCESS": 1,
+            "TYPE": "f",
             "VALUE": [
-              "half-full"
+              0.5
             ],
             "RANGE": [
               {
-                "VALS": [ "empty", "half-full", "full" ]
+                "MIN": 0.0,
+                "MAX": 100.0
               }
             ]
+          },
+          "bar": {
+            "DESCRIPTION": "demonstrates a read/write OSC node- two ints with different ranges",
+            "FULL_PATH": "/bar",
+            "ACCESS": 3,
+            "TYPE": "ii",
+            "VALUE": [
+              4,
+              51
+            ],
+            "RANGE": [
+              {
+                "MIN": 0,
+                "MAX": 50
+              },
+              {
+                "MIN": 51,
+                "MAX": 100
+              }
+            ]
+          },
+          "baz": {
+            "DESCRIPTION": "simple container node, with one method- qux",
+            "FULL_PATH": "/baz",
+            "ACCESS": 0,
+            "CONTENTS": {
+              "qux":  {
+                "DESCRIPTION": "read/write OSC node- accepts one of several string-type inputs",
+                "FULL_PATH": "/baz/qux",
+                "ACCESS": 3,
+                "TYPE": "s",
+                "VALUE": [
+                  "half-full"
+                ],
+                "RANGE": [
+                  {
+                    "VALS": [ "empty", "half-full", "full" ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+       }
+
+      const render = function(thing) {
+        for (name in thing) {
+          const { TYPE, CONTENTS, VALUE, RANGE, FULL_PATH } = thing[name]
+          renderName(name)
+          if (TYPE) {
+            Array.from(TYPE).forEach((type, index) => {
+              switch (type) {
+                case "s": renderString({FULL_PATH, VALUE: VALUE[index], RANGE: RANGE[index]}); break;
+                case "f": renderRange({FULL_PATH, VALUE: VALUE[index], RANGE: RANGE[index]}); break;
+                case "i": renderRange({FULL_PATH, VALUE: VALUE[index], RANGE: RANGE[index]}); break;
+              }
+            })
+          }
+
+          if (CONTENTS) {
+            render(CONTENTS)
           }
         }
       }
-    }
-   }
 
-  const render = function(thing) {
-    for (name in thing) {
-      const { TYPE, CONTENTS, VALUE, RANGE, FULL_PATH } = thing[name]
-      console.log(TYPE, CONTENTS, VALUE, RANGE, FULL_PATH)
-      renderName(name)
-      if (TYPE) {
-        Array.from(TYPE).forEach((type, index) => {
-          switch (type) {
-            case "s": renderString({FULL_PATH, VALUE: VALUE[index], RANGE: RANGE[index]}); break;
-            case "f": renderRange({FULL_PATH, VALUE: VALUE[index], RANGE: RANGE[index]}); break;
-            case "i": renderRange({FULL_PATH, VALUE: VALUE[index], RANGE: RANGE[index]}); break;
+      const renderName = function(name) {
+        let nameTemplate = document.querySelector('#nameTemplate')
+        nameTemplate.content.querySelector('h2').textContent = name
+        let clone = document.importNode(nameTemplate.content, true)
+        document.querySelector('section').appendChild(clone)
+      }
+
+      const renderRange = function({FULL_PATH, VALUE, RANGE}) {
+        let rangeTemplate = document.querySelector('#rangeTemplate')
+        rangeTemplate.content.querySelector('label').textContent = FULL_PATH
+        let input = rangeTemplate.content.querySelector('input')
+        input.setAttribute('min', RANGE.MIN)
+        input.setAttribute('max', RANGE.MAX)
+        input.setAttribute('value', VALUE)
+        let clone = document.importNode(rangeTemplate.content, true)
+        document.querySelector('section').appendChild(clone)
+      }
+
+      const renderString = function({FULL_PATH, VALUE, RANGE}) {
+        if (RANGE != null && RANGE.VALS != null) {
+          let selectTemplate = document.querySelector('#selectTemplate')
+          selectTemplate.content.querySelector('label').textContent = FULL_PATH
+          let selects = selectTemplate.content.querySelector('select')
+          for (option of RANGE.VALS) {
+            var opt = document.createElement("option")
+            opt.value = option
+            opt.text = option
+            opt.defaultSelected = (option == VALUE)
+            selects.add(opt)
           }
-        })
+          let clone = document.importNode(selectTemplate.content, true)
+          document.querySelector('section').appendChild(clone)
+        } else {
+          let textTemplate = document.querySelector('#textTemplate')
+          textTemplate.content.querySelector('label').textContent = FULL_PATH
+          textTemplate.content.querySelector('input').setAttribute('value', VALUE)
+          let clone = document.importNode(textTemplate.content, true)
+          document.querySelector('section').appendChild(clone)
+        }
       }
 
-      if (CONTENTS) {
-        render(CONTENTS)
+      document.onreadystatechange = () => {
+        if (document.readyState === "interactive") {
+           render({state})
+        }
       }
-    }
-  }
 
-  const renderName = function(name) {
-    let nameTemplate = document.querySelector('#nameTemplate')
-    nameTemplate.content.querySelector('h2').textContent = name
-    let clone = document.importNode(nameTemplate.content, true)
-    document.body.appendChild(clone)
-  }
-
-  const renderRange = function({FULL_PATH, VALUE, RANGE}) {
-    let rangeTemplate = document.querySelector('#rangeTemplate')
-    rangeTemplate.content.querySelector('label').textContent = FULL_PATH
-    let input = rangeTemplate.content.querySelector('input')
-    input.setAttribute('min', RANGE.MIN)
-    input.setAttribute('max', RANGE.MAX)
-    input.setAttribute('value', VALUE)
-    let clone = document.importNode(rangeTemplate.content, true)
-    document.body.appendChild(clone)
-  }
-
-  const renderString = function({FULL_PATH, VALUE, RANGE}) {
-    if (RANGE != null && RANGE.VALS != null) {
-      console.log(RANGE)
-      let selectTemplate = document.querySelector('#selectTemplate')
-      selectTemplate.content.querySelector('label').textContent = FULL_PATH
-      let selects = selectTemplate.content.querySelector('select')
-      for (option of RANGE.VALS) {
-        var opt = document.createElement("option")
-        opt.value = option
-        opt.text = option
-        opt.defaultSelected = (option == VALUE)
-        selects.add(opt)
-      }
-      let clone = document.importNode(selectTemplate.content, true)
-      document.body.appendChild(clone)
-    } else {
-      let textTemplate = document.querySelector('#textTemplate')
-      textTemplate.content.querySelector('label').textContent = FULL_PATH
-      textTemplate.content.querySelector('input').setAttribute('value', VALUE)
-      let clone = document.importNode(textTemplate.content, true)
-      document.body.appendChild(clone)
-    }
-  }
-
-  document.onreadystatechange = () => {
-    if (document.readyState === "interactive") {
-       render({state})
-    }
-  }
-
- </script>
+     </script>
+   </body>
+ </html>
