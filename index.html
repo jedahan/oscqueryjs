@@ -4,6 +4,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>boop!</title>
     <link rel="stylesheet" href="/bulma-0.6.2/css/bulma.css" >
+    <style>
+      .section {
+        max-width: 600px
+      }
+    </style>
   </head>
 
   <body>
@@ -15,18 +20,33 @@
     </template>
 
     <template id="selectTemplate">
-     <label></label>
-     <select></select>
+      <div class="field">
+        <label class="label"></label>
+        <div class="select">
+          <select></select>
+        </div>
+        <p class="help"></p>
+      </div>
     </template>
 
     <template id="textTemplate">
-     <label></label>
-     <input type="text" />
+      <div class="field">
+        <label class="label"></label>
+        <div class="control">
+          <input class="input" type="text" />
+        </div>
+        <p class="help"></p>
+      </div>
     </template>
 
     <template id="rangeTemplate">
-     <label></label>
-     <input type="range" />
+      <div class="field">
+        <label class="label"></label>
+        <div class="control">
+          <input class="input range" type="range" />
+        </div>
+        <p class="help"></p>
+      </div>
     </template>
 
     <script>
@@ -96,14 +116,15 @@
 
       const render = function(thing) {
         for (name in thing) {
-          const { TYPE, CONTENTS, VALUE, RANGE, FULL_PATH } = thing[name]
+          const { TYPE, CONTENTS, VALUE, RANGE, FULL_PATH, DESCRIPTION } = thing[name]
           renderName(name)
           if (TYPE) {
             Array.from(TYPE).forEach((type, index) => {
+              const vals = {FULL_PATH, DESCRIPTION, VALUE: VALUE[index], RANGE: RANGE[index]}
               switch (type) {
-                case "s": renderString({FULL_PATH, VALUE: VALUE[index], RANGE: RANGE[index]}); break;
-                case "f": renderRange({FULL_PATH, VALUE: VALUE[index], RANGE: RANGE[index]}); break;
-                case "i": renderRange({FULL_PATH, VALUE: VALUE[index], RANGE: RANGE[index]}); break;
+                case "s": renderString(vals); break;
+                case "f": renderRange(vals); break;
+                case "i": renderRange(vals); break;
               }
             })
           }
@@ -121,13 +142,14 @@
         document.querySelector('section').appendChild(clone)
       }
 
-      const renderRange = function({FULL_PATH, VALUE, RANGE}) {
+      const renderRange = function({FULL_PATH, VALUE, RANGE, DESCRIPTION}) {
         let rangeTemplate = document.querySelector('#rangeTemplate')
         rangeTemplate.content.querySelector('label').textContent = FULL_PATH
         let input = rangeTemplate.content.querySelector('input')
         input.setAttribute('min', RANGE.MIN)
         input.setAttribute('max', RANGE.MAX)
         input.setAttribute('value', VALUE)
+        rangeTemplate.content.querySelector('p').textContent = DESCRIPTION
         let clone = document.importNode(rangeTemplate.content, true)
         document.querySelector('section').appendChild(clone)
       }
