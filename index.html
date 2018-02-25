@@ -12,8 +12,23 @@
   </head>
 
   <body>
-    <section class="section">
-    </section>
+    <div class="container">
+      <div class="columns">
+        <div class="column controls">
+        </div>
+        <div class="column source">
+        </div>
+      </div>
+    </div>
+
+    <template id="sourceTemplate">
+      <div class="field">
+        <div class="control">
+          <label class="label">source</label>
+          <textarea class="textarea is-small" type="text" rows="50" readonly></textarea>
+        </div>
+      </div>
+    </template>
 
     <template id="nameTemplate">
      <h2></h2>
@@ -139,7 +154,7 @@
         let nameTemplate = document.querySelector('#nameTemplate')
         nameTemplate.content.querySelector('h2').textContent = name
         let clone = document.importNode(nameTemplate.content, true)
-        document.querySelector('section').appendChild(clone)
+        document.querySelector('.controls').appendChild(clone)
       }
 
       const renderRange = function({FULL_PATH, VALUE, RANGE, DESCRIPTION}) {
@@ -151,7 +166,7 @@
         input.setAttribute('value', VALUE)
         rangeTemplate.content.querySelector('p').textContent = DESCRIPTION
         let clone = document.importNode(rangeTemplate.content, true)
-        document.querySelector('section').appendChild(clone)
+        document.querySelector('.controls').appendChild(clone)
       }
 
       const renderString = function({FULL_PATH, VALUE, RANGE}) {
@@ -167,19 +182,24 @@
             selects.add(opt)
           }
           let clone = document.importNode(selectTemplate.content, true)
-          document.querySelector('section').appendChild(clone)
+          document.querySelector('.controls').appendChild(clone)
         } else {
           let textTemplate = document.querySelector('#textTemplate')
           textTemplate.content.querySelector('label').textContent = FULL_PATH
           textTemplate.content.querySelector('input').setAttribute('value', VALUE)
           let clone = document.importNode(textTemplate.content, true)
-          document.querySelector('section').appendChild(clone)
+          document.querySelector('.controls').appendChild(clone)
         }
       }
 
       document.onreadystatechange = () => {
         if (document.readyState === "interactive") {
-           render({state})
+          const source = JSON.stringify(state, null, '\t')
+          let sourceTemplate = document.querySelector('#sourceTemplate')
+          sourceTemplate.content.querySelector('textarea').textContent = source
+          let clone = document.importNode(sourceTemplate.content, true)
+          document.querySelector('.source').appendChild(clone)
+          render({state})
         }
       }
 
